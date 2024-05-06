@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
 import { account } from 'src/_mock/account';
+import { useNavigate } from "react-router-dom";
 
 // ----------------------------------------------------------------------
 
@@ -32,14 +33,20 @@ const MENU_OPTIONS = [
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const navigate = useNavigate();
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
   const handleClose = () => {
+    localStorage.removeItem('token');
     setOpen(null);
+    localStorage.removeItem('token');
+
+    navigate("/login");
   };
+  
 
   return (
     <>
@@ -108,7 +115,7 @@ export default function AccountPopover() {
           onClick={handleClose}
           sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
         >
-          Logout
+          Logout 
         </MenuItem>
       </Popover>
     </>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState ,useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -12,13 +12,13 @@ import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
-
 import { useRouter } from 'src/routes/hooks';
-
+// import { signInUser } from '../../api/userService';
 import { bgGradient } from 'src/theme/css';
-
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
+
+import userService from 'src/api/userService';
 
 // ----------------------------------------------------------------------
 
@@ -26,22 +26,58 @@ export default function LoginView() {
   const theme = useTheme();
 
   const router = useRouter();
-
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleClick = () => {
-    router.push('/dashboard');
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
   };
+
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value);
+  };
+
+
+  const handleClick = async () => {
+    const dataToSend = { email: email, password: password };
+    
+    try {
+      const response = await userService.signInUser(dataToSend);
+      console.log('response:', response);
+      
+      if (response.success) {
+        localStorage.setItem('token', response.token);
+        router.push('/');
+        // router.push('/dashboard');
+      }
+
+    } catch (error) {
+      console.error('Error occurred:', error);
+    }
+  };
+
+  useEffect(() => {
+    console.log('my ~~~~~~~~ email', email,password)
+  }, [email,password])
+  
 
   const renderForm = (
     <>
       <Stack spacing={3}>
-        <TextField name="email" label="Email address" />
+        <TextField
+          name="email"
+          label="Email address"
+          value={email}
+          onChange={handleEmailChange}
+        />
 
         <TextField
           name="password"
           label="Password"
           type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={handlePasswordChange}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -52,9 +88,8 @@ export default function LoginView() {
             ),
           }}
         />
-      </Stack>
-
-      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
+      </Stack>     
+       <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
         <Link variant="subtitle2" underline="hover">
           Forgot password?
         </Link>
@@ -99,7 +134,7 @@ export default function LoginView() {
             maxWidth: 420,
           }}
         >
-          <Typography variant="h4">Sign in to Minimal</Typography>
+          <Typography variant="h4">Sign in to games</Typography>
 
           <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
             Don’t have an account?

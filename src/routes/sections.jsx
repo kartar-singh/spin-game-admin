@@ -1,5 +1,6 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Outlet, Navigate, useRoutes } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from 'src/layouts/dashboard';
 
@@ -10,9 +11,27 @@ export const LoginPage = lazy(() => import('src/pages/login'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
-// ----------------------------------------------------------------------
-
 export default function Router() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Initialize with false
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+      navigate("/login");
+    }
+  }, [navigate]); // Add navigate to dependencies to avoid the missing dependency warning
+
+
+  useEffect(() => {
+    // Check if there is a token in local storage
+    console.log('isAuthenticated:', isAuthenticated);
+  }, [isAuthenticated]);
+
+
   const routes = useRoutes([
     {
       element: (

@@ -1,26 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
+import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
-import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+import Typography from '@mui/material/Typography';
+import userService from 'src/api/userService';
 
-import { users } from 'src/_mock/user';
+// import { users } from 'src/_mock/user';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
-import TableNoData from '../table-no-data';
-import UserTableRow from '../user-table-row';
-import UserTableHead from '../user-table-head';
 import TableEmptyRows from '../table-empty-rows';
+import TableNoData from '../table-no-data';
+import UserTableHead from '../user-table-head';
+import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
+import { applyFilter, emptyRows, getComparator } from '../utils';
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +38,8 @@ export default function UserPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const [users, setUsers] = useState([])
+
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {
@@ -44,6 +47,21 @@ export default function UserPage() {
       setOrderBy(id);
     }
   };
+
+  useEffect(() => {
+    const usersList = async () => {
+      const myUsers = await userService.getUsers()
+      console.log('my ~~~~~~~~', myUsers)
+      setUsers(myUsers?.users)
+    }
+    usersList()
+  }, [])
+
+
+  useEffect(() => {
+    console.log('my ~~~~~~~~2', users)
+
+  }, [users])
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -54,11 +72,11 @@ export default function UserPage() {
     setSelected([]);
   };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event, email) => {
+    const selectedIndex = selected.indexOf(email);
     let newSelected = [];
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, email);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -122,31 +140,40 @@ export default function UserPage() {
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
-                  { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
+                  { id: 'email', label: 'email' },
+                  { id: 'firstName', label: 'firstName' },
+                  { id: 'lastName', label: 'lastName' },
                 ]}
               />
               <TableBody>
-                {dataFiltered
+                {/* {dataFiltered
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => (
                     <UserTableRow
                       key={row.id}
-                      name={row.name}
-                      role={row.role}
-                      status={row.status}
-                      company={row.company}
-                      avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
-                      selected={selected.indexOf(row.name) !== -1}
-                      handleClick={(event) => handleClick(event, row.name)}
+                      email={row.email}
+                      firstName={row.firstName}
+                      lastName={row.lastName}
+                      selected={selected.indexOf(row.email) !== -1}
+                      handleClick={(event) => handleClick(event, row.email)}
                     />
-                  ))}
-
+                  ))} */}
+                {dataFiltered
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => {
+                    console.log('my ~~~~~~~~ row 1', row);
+                    console.log('my ~~~~~~~~ row 2', row.email, row.lastName);
+                    return (
+                      <UserTableRow
+                      key={row.id}
+                      email={row.email}
+                      firstName={row.firstName}
+                      lastName={row.lastName}
+                      selected={selected.indexOf(row.email) !== -1}
+                      handleClick={(event) => handleClick(event, row.email)}
+                    />
+                    );
+                  })}
                 <TableEmptyRows
                   height={77}
                   emptyRows={emptyRows(page, rowsPerPage, users.length)}
